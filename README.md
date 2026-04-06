@@ -69,6 +69,7 @@ Password: santha$123
 * POST `/users/login` → Login & get token
 * GET `/users/all` → Get all users
 * PUT `/users/update/{id}/role` → Update role
+* PUT `/users/update/{id}/status` → Update status
 * DELETE `/users/delete/{id}` → Delete user
 
 ---
@@ -77,6 +78,10 @@ Password: santha$123
 
 * POST `/records/create` → Create record
 * GET `/records/all` → Get all records
+* GET `/records/summary/month` → Summary by month
+* GET `/records/summary/category` → Summary by category
+* GET `/records/income/total` → Total income
+* GET `/records/expense/total` → Total expense
 * PUT `/records/update/{id}` → Update record
 * DELETE `/records/delete/{id}` → Delete record
 * GET `/records/filter` → Filter records

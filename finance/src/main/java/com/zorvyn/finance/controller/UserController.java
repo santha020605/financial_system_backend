@@ -32,18 +32,21 @@ public class UserController {
 	public UserController(UserService userService) {
 		this.userService = userService;
 	}
-
+	
+	
 	@PostMapping("/create")
 	public User createUser(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
 		return userService.createUser(userDTO, request);
 
 	}
 
+	
 	@PostMapping("/login")
 	public String login(@RequestBody LoginAuthenticateDTO dto) {
 		return userService.login(dto);
 		
 	}
+	
 
 	@GetMapping("/all")
 	public List<User> getAllUsers() {
@@ -51,32 +54,38 @@ public class UserController {
 		
 	}
 	
-	@Operation(summary = "Update User Info only")
-	@PutMapping("/update/{id}")
-	public User updateUser(@PathVariable Long id, @RequestBody User user) {
-		return userService.updateUser(id, user);
+	
+	@PutMapping("/update")
+	public User updateUser(@RequestBody UserDTO user, HttpServletRequest request) {
+		return userService.updateUser(user, request);
 		
 	}
+	
+	
 
-	@Operation(summary = "Update User's Role Only By ADMIN")
+	@Operation(summary = "UPDATE ROLE OF THE USER")
 	@PutMapping("/update/{id}/role")
 	public User updateRole(@PathVariable Long id, @RequestParam String updatedRole, HttpServletRequest request) {
 		return userService.updateRole(id, updatedRole, request);
 
 	}
-
-	@Operation(summary = "Update User's Status Only By ADMIN")
+	
+	
+	
+	@Operation(summary = "UPDATE STATUS OF THE USER")
 	@PutMapping("/update/{id}/status")
 	public User updateStatus(@PathVariable Long id, @RequestParam String status, HttpServletRequest request) {
 		return userService.updateStatus(id, status, request);
 		
 	}
+	
+	
 
-	@Operation(summary = "Delete User Only By ADMIN")
 	@DeleteMapping("/delete/{id}")
 	public String deleteUser(@PathVariable Long id, HttpServletRequest request) {
 		return userService.deleteUser(id, request);
 		
 	}
+	
 
 }

@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zorvyn.finance.models.FinancialRecord;
+import com.zorvyn.finance.dto.DashboardDTO;
+import com.zorvyn.finance.dto.FinancialRecordDTO;
+import com.zorvyn.finance.dto.FinancialRecordRequestDTO;
 import com.zorvyn.finance.models.Type;
 import com.zorvyn.finance.service.FinancialRecordService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -25,6 +28,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/records")
 public class FinancialRecordController {
+	
+	
 	
 	private final FinancialRecordService recordService;
 	
@@ -34,27 +39,32 @@ public class FinancialRecordController {
 	}
 	
 	
+	
 	//CRUD OPERATIONS APIs
 	
-	
+	@Operation(summary = "CREATE RECORD")
 	@PostMapping("/create")
-	public FinancialRecord createRecord(@RequestBody FinancialRecord record, HttpServletRequest request) {
-		return recordService.createRecord(record, request);
+	public FinancialRecordDTO createRecord(@RequestBody FinancialRecordRequestDTO recordDTO, HttpServletRequest request) {
+		return recordService.createRecord(recordDTO, request);
 		
 	}
 	
+	@Operation(summary = "GET ALL RECORDS")
 	@GetMapping("/all")
-    public List<FinancialRecord> getAllRecords() {
-		 return recordService.getAllReocrds();
-		
-    }
+	public List<FinancialRecordDTO> getAll() {
+	    return recordService.getAllRecords();
+	}
 	
+	
+	@Operation(summary = "UPDATE RECORD")
 	@PutMapping("/update/{id}")
-    public FinancialRecord updateRecord(@PathVariable Long id,
-                                  @RequestBody FinancialRecord record, HttpServletRequest request) {
-        return recordService.updateRecord(id, record, request);
+    public FinancialRecordDTO updateRecord(@PathVariable Long id,
+                                  @RequestBody FinancialRecordRequestDTO recordDTO, HttpServletRequest request) {
+        return recordService.updateRecord(id, recordDTO, request);
     }
 	
+	
+	@Operation(summary = "DELETE RECORD")
 	@DeleteMapping("/delete/{id}")
     public String deleteRecord(@PathVariable Long id, HttpServletRequest request) {
 		recordService.deleteRecord(id,request);
@@ -62,47 +72,56 @@ public class FinancialRecordController {
         
     }
 	
+	
+	@Operation(summary = "FILTER RECORDS")
 	@GetMapping("/filter")
-	public List<FinancialRecord> filterRecords(@RequestParam(required = false) Type type,
+	public List<FinancialRecordDTO> filterRecords(@RequestParam(required = false) Type type,
 			@RequestParam(required = false) String category, @RequestParam(required = false) String strDate, HttpServletRequest  request) {
 		LocalDate date = (strDate != null) ? LocalDate.parse(strDate) : null;
-		return recordService.filterReocrds(type, category, date, request);
+		return recordService.filterRecords(type, category, date, request);
 	}
+	
+		
 	
 	
 	//DASHBOARD SUMMARY APIs
 	
-	
+	@Operation(summary = "TOTAL INCOME")
 	@GetMapping("/income/total")
-	public double totalIncome() {
-	    return recordService.getTotalIncome();
+	public double totalIncome(HttpServletRequest request) {
+	    return recordService.getTotalIncome(request);
 	}
 	
+	
+	@Operation(summary = "TOTAL EXPENSE")
 	@GetMapping("/expense/total")
-	public double totalExpense() {
-	    return recordService.getTotalExpense();
+	public double totalExpense(HttpServletRequest request) {
+	    return recordService.getTotalExpense(request);
 	}
 	
+	
+	@Operation(summary = "TOTAL SUMMARY BY CATEGORY")
 	@GetMapping("/summary/category")
-	public Map<String, Double> categorySummary() {
-	    return recordService.getCategorySummary();
+	public Map<String, Double> categorySummary(HttpServletRequest request) {
+	    return recordService.getCategorySummary(request);
 	}
 	
+	@Operation(summary = "TOTAL SUMMARY BY MONTH")
 	@GetMapping("/summary/month")
-	public Map<Integer, Double> monthlySummary() {
-	    return recordService.getMonthlySummary();
+	public Map<Integer, Double> monthlySummary(HttpServletRequest request) {
+	    return recordService.getMonthlySummary(request);
 	}
+	
+	
+	
+	
 	
 	
 	// APIs FOR EACH USER SUMMARY
 	
-	@GetMapping("/income/user")
-	public double totalIncomeByUser(HttpServletRequest request) {
-	    return recordService.getTotalIncomeByUser(request);
-	}
-	
-	@GetMapping("/expense/user")
-	public double totalExpenseByUser(HttpServletRequest request) {
-	    return recordService.getTotalExpenseByUser(request);
+	@Operation(summary = "VIEWERS DASHBOARD")
+	@GetMapping("/dashboard")
+	public DashboardDTO totalIncomeByUser(HttpServletRequest request) {
+	    return recordService.getDashboard(request);
 	}
 }

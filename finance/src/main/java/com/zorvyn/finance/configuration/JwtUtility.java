@@ -18,6 +18,7 @@ public class JwtUtility {
 		return Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8));
 	}
 
+	
 	public String generateToken(String email, String role) {
 		return Jwts.builder().
 				setSubject(email)
@@ -28,6 +29,7 @@ public class JwtUtility {
 				.compact();
 	}
 
+	
 	public String extractEmail(String token) {
 		return Jwts.parserBuilder()
 				.setSigningKey(getSignKey())
@@ -37,6 +39,7 @@ public class JwtUtility {
 				.getSubject();
 	}
 
+	
 	public String extractRole(String token) {
 		return Jwts.parserBuilder()
 				.setSigningKey(getSignKey())

@@ -3,10 +3,14 @@ package com.zorvyn.finance.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.zorvyn.finance.dto.DashboardDTO;
+import com.zorvyn.finance.dto.FinancialRecordDTO;
+import com.zorvyn.finance.dto.FinancialRecordRequestDTO;
 import com.zorvyn.finance.models.FinancialRecord;
 import com.zorvyn.finance.models.Role;
 import com.zorvyn.finance.models.Type;
@@ -27,34 +31,93 @@ public class FinancialRecordService {
 		this.userRepo = userRepo;
 	}
 	
-	public FinancialRecord createRecord(FinancialRecord record,HttpServletRequest request) {
+	
+	
+	
+	
+	public FinancialRecordDTO createRecord(FinancialRecordRequestDTO recordDTO, HttpServletRequest request) {
 
-		String role = (String) request.getAttribute("role");
+	    String role = (String) request.getAttribute("role");
+	    checkAccess(role, Role.ADMIN.name());
 
-		checkAccess(role, Role.ADMIN.name());
-		return recordRepo.save(record);
+	    User user = userRepo.findById(recordDTO.getUserId())
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    FinancialRecord record = new FinancialRecord();
+
+	    record.setAmount(recordDTO.getAmount());
+	    record.setType(recordDTO.getType());
+	    record.setCategory(recordDTO.getCategory());
+	    record.setDate(recordDTO.getDate());
+	    record.setDescription(recordDTO.getDescription());
+
+	    record.setUser(user);
+
+	    return mapToDTO(recordRepo.save(record));
+	}
+	
+	
+	
+	
+	
+	
+
+    public FinancialRecordDTO updateRecord(Long id, FinancialRecordRequestDTO recordDTO, HttpServletRequest request) {
+
+        String role = (String) request.getAttribute("role");
+        checkAccess(role, Role.ADMIN.name());
+
+        FinancialRecord record = recordRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Record not found"));
+
+        User user = userRepo.findById(recordDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        record.setAmount(recordDTO.getAmount());
+        record.setType(recordDTO.getType());
+        record.setCategory(recordDTO.getCategory());
+        record.setDate(recordDTO.getDate());
+        record.setDescription(recordDTO.getDescription());
+        record.setUser(user);
+
+        return mapToDTO(recordRepo.save(record));
     }
+    
+    
+    
 
-    public List<FinancialRecord> getAllReocrds() {
-        return recordRepo.findAll();
+    public List<FinancialRecordDTO> getAllRecords() {
+        return recordRepo.findAll()
+	            .stream()
+	            .map(this::mapToDTO)
+	            .toList();
     }
+    
+    
+    
+    
+    
+    // CONVERT DATA TRANSFER OBJECT
+    
+    public FinancialRecordDTO mapToDTO(FinancialRecord record) {
 
-    public FinancialRecord updateRecord(Long id, FinancialRecord updated, HttpServletRequest request) {
-    	
-    	String role = (String) request.getAttribute("role");
+        FinancialRecordDTO dto = new FinancialRecordDTO();
 
-		checkAccess(role, Role.ADMIN.name(), Role.ANALYST.name());
-		
-        FinancialRecord record = recordRepo.findById(id).orElseThrow();
+        dto.setId(record.getId());
+        dto.setAmount(record.getAmount());
+        dto.setType(record.getType().name());
+        dto.setCategory(record.getCategory());
+        dto.setDate(record.getDate());
+        dto.setDescription(record.getDescription());
 
-        record.setAmount(updated.getAmount());
-        record.setType(updated.getType());
-        record.setCategory(updated.getCategory());
-        record.setDate(updated.getDate());
-        record.setDescription(updated.getDescription());
+        dto.setUserId(record.getUser().getId());
 
-        return recordRepo.save(record);
+        return dto;
     }
+    
+    
+    
+    
 
     public void deleteRecord(Long id, HttpServletRequest request) {
     	
@@ -63,8 +126,13 @@ public class FinancialRecordService {
 		checkAccess(role, Role.ADMIN.name());
 		recordRepo.deleteById(id);
     }
+    
+    
+    
+    
+    
 	
-	public List<FinancialRecord> filterReocrds(Type type, String category, LocalDate date, HttpServletRequest request) {
+	public List<FinancialRecordDTO> filterRecords(Type type, String category, LocalDate date, HttpServletRequest request) {
 
 		String role = (String) request.getAttribute("role");
 
@@ -90,26 +158,53 @@ public class FinancialRecordService {
 	                .toList();
 	    }
 
-	    return records;
+	    return records.stream()
+	            .map(this::mapToDTO)
+	            .toList();
 	}
+	
+	
+	
+	
+	
 	
 	//Dashboard summary for all users
 	
-	public double getTotalIncome() {
+	public double getTotalIncome(HttpServletRequest request) {
+		
+		String role = (String) request.getAttribute("role");
+
+		checkAccess(role, Role.ADMIN.name(), Role.ANALYST.name());
+		
 	    return recordRepo.findAll().stream()
 	            .filter(r -> r.getType().name().equals("INCOME"))
 	            .mapToDouble(FinancialRecord::getAmount)
 	            .sum();
 	}
 	
-	public double getTotalExpense() {
+	public double getTotalExpense(HttpServletRequest request) {
+		
+		String role = (String) request.getAttribute("role");
+
+		checkAccess(role, Role.ADMIN.name(), Role.ANALYST.name());
+		
 	    return recordRepo.findAll().stream()
 	            .filter(r -> r.getType().name().equals("EXPENSES"))
 	            .mapToDouble(FinancialRecord::getAmount)
 	            .sum();
 	}
 	
-	public Map<String, Double> getCategorySummary() {
+	
+	
+	
+	
+	
+	public Map<String, Double> getCategorySummary(HttpServletRequest request) {
+		
+		String role = (String) request.getAttribute("role");
+
+		checkAccess(role, Role.ADMIN.name(), Role.ANALYST.name());
+		
 	    return recordRepo.findAll().stream()
 	            .collect(Collectors.groupingBy(
 	                    FinancialRecord::getCategory,
@@ -117,7 +212,11 @@ public class FinancialRecordService {
 	            ));
 	}
 	
-	public Map<Integer, Double> getMonthlySummary() {
+	public Map<Integer, Double> getMonthlySummary(HttpServletRequest request) {
+		
+		String role = (String) request.getAttribute("role");
+
+		checkAccess(role, Role.ADMIN.name(), Role.ANALYST.name());
 	    return recordRepo.findAll().stream()
 	            .collect(Collectors.groupingBy(
 	                    r -> r.getDate().getMonthValue(),
@@ -125,23 +224,33 @@ public class FinancialRecordService {
 	            ));
 	}
 	
+	
+	
+	
+	
+	
 	// Dashboard summary for each users
 	
-	public double getTotalIncomeByUser(HttpServletRequest request) {
-
-	    String email = (String) request.getAttribute("email");
-	    User user = userRepo.findByEmail(email);
-
-	    return recordRepo.getTotalIncomeByUser(user);
+	public DashboardDTO getDashboard(HttpServletRequest request) {
+		
+		String email = (String) request.getAttribute("email");
+		User user = userRepo.findByEmail(email);
+		
+		double income = Optional.ofNullable(recordRepo.getTotalIncomeByUser(user)).orElse(0.0);
+		double expense = Optional.ofNullable(recordRepo.getTotalExpenseByUser(user)).orElse(0.0);
+		
+		DashboardDTO dashboard = new DashboardDTO();
+		
+		dashboard.setTotalIncome(income);
+		dashboard.setTotalExpense(expense);
+		double balance = ((income - expense) < 0) ? 0.0 : (income - expense);
+		dashboard.setBalance(balance);
+		
+		return dashboard;
+		
 	}
-	
-	public double getTotalExpenseByUser(HttpServletRequest request) {
 
-	    String email = (String) request.getAttribute("email");
-	    User user = userRepo.findByEmail(email);
 
-	    return recordRepo.getTotalExpenseByUser(user);
-	}
 	
 
 	// ROLE BASED CHECKING  FUNCTION

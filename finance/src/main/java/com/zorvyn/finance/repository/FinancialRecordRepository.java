@@ -20,6 +20,8 @@ public interface FinancialRecordRepository extends JpaRepository<FinancialRecord
 	
 	List<FinancialRecord> findByUser(User user);
 	
+	void deleteByUser(User user);
+	
 	@Query("SELECT SUM(r.amount) FROM FinancialRecord r WHERE r.user = :user AND r.type = 'INCOME'")
 	Double getTotalIncomeByUser(User user);
 	

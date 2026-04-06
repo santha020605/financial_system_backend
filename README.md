@@ -110,15 +110,15 @@ spring.datasource.password=yourpassword
 4. Run the application
 5. Open Swagger:
 
-http://localhost:8080/swagger-ui/index.html
+[https://financial-system-backend.onrender.com](https://financial-system-backend.onrender.com/swagger-ui/index.html)
 
 ---
 
-## 🌐 Live API Documentation (Optional)
+## 🌐 Live API Documentation
 
 Add your deployed link here:
 
-https://your-app.onrender.com/swagger-ui/index.html
+https://financial-system-backend.onrender.com/swagger-ui/index.html
 
 ---
 

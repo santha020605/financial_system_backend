@@ -54,8 +54,8 @@ Authorization: Bearer <your_token>
 
 ## 👑 Default Admin Credentials
 
-Email: [admin@gmail.com](mailto:admin@gmail.com)
-Password: admin123
+Email: [santha@gmail.com](mailto:admin@gmail.com)
+Password: santha$123
 
 > Created automatically when application starts.
 
